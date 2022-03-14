@@ -1,0 +1,43 @@
+[[
+	{
+	"rom": "detective", 
+	"state": {
+		"walkthrough_act": "", 
+		"walkthrough_diff": "", 
+		"obs": "\n\n<< Chief's office >>\nYou are standing in the Chief's office. He is telling you \"The Mayor was murdered yeaterday night at 12:03 am. I want you to solve it before we get any bad publicity or the FBI has to come in. \"Yessir!\" You reply. He hands you a sheet of paper. Once you have read it, go north or west.\n\nYou can see a piece of white paper here.\n", 
+		"loc_desc": "\n\n<< Chief's office >>\nYou are standing in the Chief's office. He is telling you \"The Mayor was murdered yeaterday night at 12:03 am. I want you to solve it before we get any bad publicity or the FBI has to come in. \"Yessir!\" You reply. He hands you a sheet of paper. Once you have read it, go north or west.\n\nYou can see a piece of white paper here.\n", 
+		"inv_desc": "\nYou are carrying nothing.\n", 
+		"inv_objs": {}, 
+		"inv_attrs": {}, 
+		"location": {
+			"name": "Chief's office", 
+			"num": 34}, 
+		"surrounding_objs": {"You see nothing special about the north wall.": ["north"], "It is a piece of white paper.": ["piece", "paper", "white"], "You see nothing special about the west wall.": ["west"]}, 
+		"surrounding_attrs": {"north": [], "piece": ["legible", "animate"], "paper": ["legible", "animate"], "white": ["legible", "animate"], "west": []}, 
+		"graph": [], 
+		"valid_acts": {"(((90, 34),), (), ())": "east", "(((92, 90),), ((92, 13),), ())": "take piece", "(((90, 36),), ((36, 25),), ())": "north", "(((90, 35),), ((35, 25),), ())": "west"}, 
+		"score": 10
+	}, 
+	"next_state": {
+		"walkthrough_act": "take piece", 
+		"walkthrough_diff": "(((92, 90),), ((92, 13),), ())", 
+		"obs": "\nTaken.\n\n[Your score has just gone up by ten points.]\n", 
+		"loc_desc": "\n\n<< Chief's office >>\nYou are standing in the Chief's office. He is telling you \"The Mayor was murdered yeaterday night at 12:03 am. I want you to solve it before we get any bad publicity or the FBI has to come in. \"Yessir!\" You reply. He hands you a sheet of paper. Once you have read it, go north or west.\n", 
+		"inv_desc": "\nYou are carrying:\n  a piece of white paper\n", 
+		"inv_objs": {"It is a piece of white paper.": ["white", "piece", "paper"]}, 
+		"inv_attrs": {"white": ["legible", "animate"], "piece": ["legible", "animate"], "paper": ["legible", "animate"]}, 
+		"location": {
+			"name": "Chief's office", 
+			"num": 34
+		}, 
+		"surrounding_objs": {"It is a piece of white paper.": ["paper"], "You see nothing special about the north wall.": ["north"], "You see nothing special about the west wall.": ["west"]}, 
+		"surrounding_attrs": {"paper": [], "north": [], "west": []}, 
+		"graph": [["you", "have", "piece of white paper"], ["you", "in", "Chief's office"]], 
+		"valid_acts": {"(((90, 34),), (), ())": "east", "(((90, 36),), ((36, 25),), ())": "north", "(((90, 35),), ((35, 25),), ())": "west", "(((92, 34),), (), ())": "put piece down"}, 
+		"score": 20
+	}, 
+	"graph_diff": [["you", "have", "piece of white paper"], ["you", "in", "Chief's office"]], 
+	"action": "west", 
+	"reward": 0
+}
+]]
