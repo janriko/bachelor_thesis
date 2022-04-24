@@ -1,5 +1,5 @@
 from typing import Dict, List
-from models.JerichoLocation import JerichoLocation
+from models.raw_state.JerichoLocation import JerichoLocation
 
 
 class JerichoState:

@@ -1,5 +1,5 @@
 from typing import List
-from models.JerichoStateTransition import JerichoStateTransition
+from models.raw_state.JerichoStateTransition import JerichoStateTransition
 
 
 class JerichoTransitionList:

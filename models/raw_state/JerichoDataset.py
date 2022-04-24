@@ -1,6 +1,6 @@
 from typing import List
 from torch.utils.data import Dataset
-from models.JerichoTransitionList import JerichoTransitionList
+from models.raw_state.JerichoTransitionList import JerichoTransitionList
 
 
 class JerichoDataset(Dataset):

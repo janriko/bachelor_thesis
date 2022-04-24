@@ -1,5 +1,10 @@
 from typing import List, Dict
 from models import *
+from models.preprocessing.PreprocessedDataset import PreprocessedDataset
+from models.raw_state.JerichoDataset import JerichoDataset
+from models.raw_state.JerichoState import JerichoState
+from models.raw_state.JerichoStateTransition import JerichoStateTransition
+from models.raw_state.JerichoTransitionList import JerichoTransitionList
 
 
 def map_json_to_python_obj(pythonObj: dict) -> JerichoDataset:
