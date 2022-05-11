@@ -3,87 +3,86 @@ import random
 import transformers
 from typing import Dict, List, TextIO
 import json
-from transformers import BertTokenizer, BertModel, BertConfig, PretrainedConfig
+
+from datasets import DatasetDict
+from torch import LongTensor, tensor
+from torch.optim import AdamW
+from tqdm.auto import tqdm
+from transformers import BertTokenizer, BertModel, BertConfig, PretrainedConfig, get_scheduler
 import torch
 
+import config
 import file_loader.FileLoader
-import tokenizing
-from models import *
+import datasets
+
+from Aggregator.Aggregator import Aggregator
+from Decoder.ActionDecoder import ActionDecoder
+from Decoder.GraphDecoder import GraphDecoder
+from bert_models import TextModel, GraphModel
+from data_models import *
 import preprocessing
 import pickle
 import torch
 import torchvision
 from torch.utils.data import Dataset, DataLoader
-from torchvision import datasets, transforms
-
-from models.preprocessing.PreprocessedDataset import PreprocessedDataset
-from models.raw_state.JerichoDataset import JerichoDataset
-from models.tokenized.TokenizedDataset import TokenizedDataset
+from transformers import logging
+from data_models.preprocessing.PreprocessedDataset import PreprocessedDataset
+from data_models.raw_state.JerichoDataset import JerichoDataset
+from data_models.tokenized.TokenizedDataset import TokenizedDataset
 
 if __name__ == "__main__":
-    # either get preprocessed dataset from cache (give file name as parameter)
-    # or recompile dataset from file (give filename with jericho dataset)
-    # preprocessed_data_set: PreprocessedDataset = file_loader.FileLoader.get_preprocessed_and_tokenized_text_and_graph("JerichoWorld-main/data/small_training_set.json")
+    logging.set_verbosity_error()
 
-    # create tokenized ids with dataset (give dataset)
-    # or load from cache (don't give dataset as parameter)
-    token_ids: TokenizedDataset = file_loader.get_tokenized_text_and_graph_ids()  # preprocessed_data_set)
+    train_dataset, eval_dataset = preprocessing.preprocessing()
 
-    train_dataloader = DataLoader(
-        token_ids, shuffle=False, batch_size=10
-    )
+    train_dataloader = DataLoader(train_dataset, shuffle=False, batch_size=16)
+    eval_dataloader = DataLoader(eval_dataset, shuffle=False, batch_size=16)
 
-    # print(token_ids.tokenized_states[3].text_token_ids)
-    # print(token_ids.tokenized_states[3].graph_token_ids)
+    num_epochs = config.num_epochs
+    num_training_steps = config.num_training_steps(train_dataloader)
+    text_encoder_model, text_encoder_optimizer, device, lr_schedular, progress_bar = TextModel.get_text_encoder_data(num_training_steps)
 
-    text_ids = list(map(list, token_ids.tokenized_states))
+    aggregator = Aggregator()
+    action_decoder = ActionDecoder()
+    graph_decoder = GraphDecoder()
 
-    print(text_ids)
+    for epoch in range(num_epochs):
+        for batch in train_dataloader:
+            # separate batches
+            text_batch: Dict = {key: value for key, value in batch.items() if (key[0] == "t") or (key[0] == "l")}
+            graph_batch: Dict = {key: value for key, value in batch.items() if (key[0] == "g") or (key[0] == "l")}
 
-    # for batch in train_dataloader:
-    #     break
-    # print({k: v.shape for k, v in batch.text_token_ids})
+            # rename batch keys
+            text_batch["input_ids"] = text_batch.pop("t_input_ids")
+            text_batch["token_type_ids"] = text_batch.pop("t_token_type_ids")
+            text_batch["attention_mask"] = text_batch.pop("t_attention_mask")
 
+            graph_batch["input_ids"] = graph_batch.pop("g_input_ids")
+            graph_batch["token_type_ids"] = graph_batch.pop("g_token_type_ids")
+            graph_batch["attention_mask"] = graph_batch.pop("g_attention_mask")
 
+            text_outputs = TextModel.text_encoder_train_loop(
+                batch_dataset=text_batch,
+                text_encoder_model=text_encoder_model,
+                text_encoder_optimizer=text_encoder_optimizer,
+                device=device,
+                lr_scheduler=lr_schedular,
+                progress_bar=progress_bar
+            )
+            graph_outputs = GraphModel.graph_encoder_train_loop(
+                batch_dataset=graph_batch,
+                text_encoder_model=text_encoder_model,
+                text_encoder_optimizer=text_encoder_optimizer,
+                device=device,
+                lr_scheduler=lr_schedular,
+                progress_bar=progress_bar
+            )
 
+            # aggregator_outputs = hidden-S_t
+            aggregator_outputs = aggregator.aggregate(text_outputs, graph_outputs)
 
+            action_decoder.decode(text_outputs, aggregator_outputs)
+            graph_decoder.decode(graph_outputs, aggregator_outputs)
 
-    # Dataloader to iterate over Dataset
-    ###DataLoader(token_ids)
-    # bert-base-uncased with the paramteres
-    ###text_encoder_configuration = BertConfig(
-    ###   num_hidden_layers=6,
-    ###    num_attention_heads=6,
-    ###    feed=3072,
-    ###)
-    ###model = BertModel.from_pretrained("bert-base-uncased", text_encoder_configuration)
-
-    ###data_loader = DataLoader(token_ids, batch_size=10).__iter__()
-    ###epochs = 10 # ai durchläufe
-    ###for epoch in range(epochs):
-    ###    for batch in data_loader:
-    ###        # move batch to gpu
-    ###        model(batch)
-
-
-    # data visualizing
-    ###pass
-    # for data in preprocessed_data_set.preprocessed_states[1:2]:
-    #     print("")
-    #     print("-------------------")
-    #     print("")
-    #     print("text: " + data.concatenatedText)
-    #     print("graph: " + data.graphWithTriples)
-
-# print(pythonCustomObj.action)
-# print(pythonCustomObj.state.location.name)
-# print(pythonCustomObj.state.location.name)
-
-
-# tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-# model = BertModel.from_pretrained("bert-base-uncased")
-#
-# inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
-# outputs = model(**inputs)
-#
-# last_hidden_states = outputs.last_hidden_state
+            break
+        break

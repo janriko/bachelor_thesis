@@ -4,17 +4,20 @@ from typing import Generic, TypeVar, List
 import json
 import pickle
 
+from datasets import Dataset, DatasetDict
+
 import preprocessing
-from models.preprocessing.PreprocessedState import PreprocessedState
-from models.preprocessing.PreprocessedDataset import PreprocessedDataset
-from models.raw_state.JerichoDataset import JerichoDataset
-from models.tokenized.TokenizedDataset import TokenizedDataset
+from data_models.preprocessing.PreprocessedState import PreprocessedState
+from data_models.preprocessing.PreprocessedDataset import PreprocessedDataset
+from data_models.raw_state.JerichoDataset import JerichoDataset
+from data_models.tokenized.TokenizedDataset import TokenizedDataset
 
 # preprocessed_dataset_text_file = 'cached_data/PreprocessedDataset/preprocessed_states/concatenatedText.txt'
 # preprocessed_dataset_graph_file = 'cached_data/PreprocessedDataset/preprocessed_states/graphWithTriples.txt'
 from tokenizing import tokenize_text_and_graph
 
-preprocessed_dataset_file = 'cached_data/preprocessed_dataset'
+preprocessed_training_dataset_file = 'cached_data/preprocessed_training_dataset'
+preprocessed_testing_dataset_file = 'cached_data/preprocessed_testing_dataset'
 tokenized_dataset_file = 'cached_data/tokenized_dataset'
 
 
@@ -27,10 +30,13 @@ tokenized_dataset_file = 'cached_data/tokenized_dataset'
 #       [ACT] go north [ACT] open mailbox ...
 # G_t:
 #       [GRAPH] you, in, West of House [TRIPLE] West of house, has, mailbox [TRIPLE] mailbox, is, openable ...
-def get_preprocessed_and_tokenized_text_and_graph(file_name: str = None) -> PreprocessedDataset:
+def get_preprocessed_and_tokenized_text_and_graph(isTraining: bool, file_name: str = None) -> Dataset:
     if file_name is None:
         # load from cached file
-        preprocessed_dataset: PreprocessedDataset = pickle.load(open(preprocessed_dataset_file, 'rb'))
+        if isTraining:
+            preprocessed_dataset: Dataset = pickle.load(open(preprocessed_training_dataset_file, 'rb'))
+        else:
+            preprocessed_dataset: Dataset = pickle.load(open(preprocessed_testing_dataset_file, 'rb'))
     else:
         json_string = open(file_name, "r")
 
@@ -39,20 +45,23 @@ def get_preprocessed_and_tokenized_text_and_graph(file_name: str = None) -> Prep
         custom_jericho_dataset: JerichoDataset = preprocessing.map_json_to_python_obj(python_obj)
 
         # create pre processed dataset:
-        preprocessed_dataset: PreprocessedDataset = preprocessing.map_all_state_transitions_to_preprocessed_state(dataset=custom_jericho_dataset)
+        preprocessed_dataset: Dataset = preprocessing.map_all_state_transitions_to_preprocessed_state(dataset=custom_jericho_dataset)
 
         # save dataset to cache file
-        pickle.dump(preprocessed_dataset, open(preprocessed_dataset_file, 'wb'))
+        if isTraining:
+            pickle.dump(preprocessed_dataset, open(preprocessed_training_dataset_file, 'wb'))
+        else:
+            pickle.dump(preprocessed_dataset, open(preprocessed_testing_dataset_file, 'wb'))
 
     return preprocessed_dataset
 
 
-def get_tokenized_text_and_graph_ids(preprocessed_data_set: PreprocessedDataset = None) -> TokenizedDataset:
-    if preprocessed_data_set is None:
+def get_tokenized_text_and_graph_ids(dataset: DatasetDict = None) -> DatasetDict:
+    if dataset is None:
         # load from cached file
-        tokenized_dataset: TokenizedDataset = pickle.load(open(tokenized_dataset_file, 'rb'))
+        tokenized_dataset: DatasetDict = pickle.load(open(tokenized_dataset_file, 'rb'))
     else:
-        tokenized_dataset = tokenize_text_and_graph(preprocessed_data_set)
+        tokenized_dataset:DatasetDict = tokenize_text_and_graph(dataset)
         # save dataset to cache file
         pickle.dump(tokenized_dataset, open(tokenized_dataset_file, 'wb'))
 
