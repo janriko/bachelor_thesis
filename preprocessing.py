@@ -11,6 +11,7 @@ from data_models.raw_state.JerichoState import JerichoState
 from data_models.raw_state.JerichoStateTransition import JerichoStateTransition
 from data_models.raw_state.JerichoTransitionList import JerichoTransitionList
 
+
 def map_json_to_python_obj(pythonObj: dict) -> JerichoDataset:
     all_state_transitions: JerichoDataset = JerichoDataset(worldList=JerichoTransitionList(list()))
     for liste_index in range(len(pythonObj)):

@@ -61,8 +61,13 @@ def get_tokenized_text_and_graph_ids(dataset: DatasetDict = None) -> DatasetDict
         # load from cached file
         tokenized_dataset: DatasetDict = pickle.load(open(tokenized_dataset_file, 'rb'))
     else:
-        tokenized_dataset:DatasetDict = tokenize_text_and_graph(dataset)
+        tokenized_dataset: DatasetDict = tokenize_text_and_graph(dataset)
         # save dataset to cache file
         pickle.dump(tokenized_dataset, open(tokenized_dataset_file, 'wb'))
 
     return tokenized_dataset
+
+
+def remove_unnecessary_columns(dataset: Dataset) -> Dataset:
+    dataset = dataset.remove_columns("text")
+    return dataset

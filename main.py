@@ -81,7 +81,7 @@ if __name__ == "__main__":
             # aggregator_outputs = hidden-S_t
             aggregator_outputs = aggregator.aggregate(text_outputs, graph_outputs)
 
-            action_decoder.decode(text_outputs, aggregator_outputs)
+            next_step = action_decoder.decode(text_outputs, aggregator_outputs)
             graph_decoder.decode(graph_outputs, aggregator_outputs)
 
             break

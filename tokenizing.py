@@ -47,7 +47,7 @@ def graph_tokenize_function(state):
         padding=PaddingStrategy.MAX_LENGTH,
         truncation=True,
         max_length=1024,
-       # return_tensors="pt"
+        # return_tensors="pt"
     )
 
 
