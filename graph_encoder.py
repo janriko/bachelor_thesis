@@ -41,7 +41,7 @@ if __name__ == "__main__":
     encoder = BertModel(config=config)
     tokenizer = GraphTokenizer()
 
-    tokenizer.encode(train_dataset)
+    tokenized_dataset = tokenizer.encode(train_dataset)
 
 
     tokenized_datasets: DatasetDict = FileLoader.get_tokenized_text_and_graph_ids()
